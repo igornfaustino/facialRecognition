@@ -1,42 +1,44 @@
+# Author: Igor N Faustino
+# Mail: igornfaustino@gmail.com
+# TODO Next: Support to many faces
+
 import cv2
 import sys
+import data_utils
+import face_utils
+import numpy as np
 
 # Get user values
 try:
-    cascade_path = sys.argv[1]
+    train_path = sys.argv[1]
 except IndexError as ex:
-    print("please enter a cascade path")
+    print("please enter a training folder path")
     exit(-1)
 except:
     exit(-1)
 
-# create cascade
-face_cascade = cv2.CascadeClassifier(cascade_path)
+subjects = ["", "Igor"]
 
-# init video capture
+print("preparing data....")
+faces, labels = data_utils.prepare_training_data(train_path)
+print("done...")
+
+print("Total faces: ", len(faces))
+print("Total labels: ", len(labels))
+
+print("training....")
+face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+face_recognizer.train(faces, np.array(labels))
+print("Done...")
+
 video_capture = cv2.VideoCapture(0)
-
 while True:
-    # Capture frame-by-frame
     ret, frame = video_capture.read()
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-
-    # detect face in the images
-    faces = face_cascade.detectMultiScale(
-        gray_frame,
-        scaleFactor=1.6,
-        minNeighbors=5,
-        minSize=(30, 30),
-        # flags = cv2.cv.CV_HAAR_SCALE_IMAGE
-    )
-
-    # Draw a rectangle around the faces
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
+    image = face_utils.predict(frame, face_recognizer, subjects)
+    
     # Display the resulting frame
-    cv2.imshow('Video', frame)
+    cv2.imshow('Video', image)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
