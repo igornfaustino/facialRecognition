@@ -20,11 +20,14 @@ def prepare_training_data(data_folder_path):
 			# cv2.imshow("training", image)
 			# cv2.waitKey(100)
 
-			face, rect = face_utils.detect_face(image)
+			faces_detected, rects = face_utils.detect_face(image)
+			face = faces_detected[0]
 
 			if face is not None:
 				faces.append(face)
 				labels.append(label)
+			# else:
+			# 	print(image_name)
 		
 			# cv2.destroyAllWindows()
 			# cv2.waitKey(1)
